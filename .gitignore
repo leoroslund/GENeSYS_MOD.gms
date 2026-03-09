@@ -24,3 +24,5 @@ Results/output_technology_costs_detailed.csv
 Results/output_transmission_capacity.csv
 Inputdata/*.xlsx
 BatchFiles/settings.conf
+.DS_Store
+Results/*.csv

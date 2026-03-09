@@ -34,6 +34,7 @@ if(sum((f,r,rr),error_TradeCostsMissingFromTradeRoute(r,f,rr)),abort "TradeCosts
 parameter error_ModalSplitByModalTypeDefinition(f,*,r_full,y_full);
 error_ModalSplitByModalTypeDefinition(f,'Error in ModalGroup',r,y)$(round(sum(mt$(TagModalTypeToModalGroups(mt,'TransportModes')),ModalSplitByFuelAndModalType(r,f,mt,y)),4)>1) = 1;
 error_ModalSplitByModalTypeDefinition(f,'Error in SubGroup',r,y)$(round(sum(mt$(TagModalTypeToModalGroups(mt,'ModalSubgroups')),ModalSplitByFuelAndModalType(r,f,mt,y)),4)>1) = 1;
+display error_ModalSplitByModalTypeDefinition;
 if(sum((f,r,y),error_ModalSplitByModalTypeDefinition(f,'Error in ModalGroup',r,y)),abort "ModalSplit is wrongly defined for a ModalGroup (e.g., MT_FRT_Road). The sum of ModalTypes cannot exceed 1. Please check your data. Problematic regions and years are listed in the parameter error_ModalSplitByModalTypeDefinition.");
 if(sum((f,r,y),error_ModalSplitByModalTypeDefinition(f,'Error in SubGroup',r,y)),abort "ModalSplit is wrongly defined for a subgroup in the ModalSplit (e.g., MT_FRT_Road_RE). The sum of ModalTypes cannot exceed 1. Please check your data. Problematic regions and years are listed in the parameter error_ModalSplitByModalTypeDefinition.");
 
