@@ -24,10 +24,10 @@
 
 $if not set data_file                    $setglobal data_file RegularParameters_None
 $if not set hourly_data_file             $setglobal hourly_data_file Timeseries_Europe_EnVis_REPowerEU++
-$if not set model_region                 $setglobal model_region europe
-$if not set data_base_region             $setglobal data_base_region DE
+$if not set model_region                 $setglobal model_region sweden
+$if not set data_base_region             $setglobal data_base_region SE3
 $if not set year                         $setglobal year 2018
-$if not set emissionPathway              $setglobal emissionPathway REPowerEU
+$if not set emissionPathway              $setglobal emissionPathway Sweden
 $if not set emissionScenario             $setglobal emissionScenario globalLimit
 
 * ### settings for time series reduction
@@ -39,10 +39,10 @@ $if not set elmod_dunkelflaute           $setglobal elmod_dunkelflaute 0
 
 * ### technical settings for data input/output
 
-$if not set switch_test_data_load        $setglobal switch_test_data_load 1
+$if not set switch_test_data_load        $setglobal switch_test_data_load 0
 $if not set switch_only_load_gdx         $setglobal switch_only_load_gdx 0
 
-$if not set switch_unixPath              $setglobal switch_unixPath 0
+$if not set switch_unixPath              $setglobal switch_unixPath 1
 $if not set switch_read_data_long        $setglobal switch_read_data_long 1
 $if not set switch_write_output          $setglobal switch_write_output gdx
 $if not set switch_only_write_results    $setglobal switch_only_write_results 0
@@ -56,7 +56,7 @@ $if not set threads                      $setglobal threads 4
 
 $if not set switch_investLimit           $setglobal switch_investLimit 1
 $if not set switch_infeasibility_tech    $setglobal switch_infeasibility_tech 0
-$if not set switch_base_year_bounds      $setglobal switch_base_year_bounds 1
+$if not set switch_base_year_bounds      $setglobal switch_base_year_bounds 0
 $if not set switch_base_year_bounds_debugging      $setglobal switch_base_year_bounds_debugging 0
 
 * ### model settings, enabling / changing certain features
@@ -122,6 +122,9 @@ $setglobal hourly_data_file Timeseries_Europe_EnVis_Green
 $elseif %emissionPathway% == Trinity
 $setglobal data_file RegularParameters_Europe_EnVis_Trinity
 $setglobal hourly_data_file Timeseries_Europe_EnVis_Trinity
+$elseif %emissionPathway% == Sweden
+$setglobal data_file RegularParameters_Sweden_EnVis_Trinity
+$setglobal hourly_data_file Timeseries_Sweden
 $endif
 
 $ifthen %model_region% == middleearth
@@ -222,6 +225,7 @@ solutiontype 2
 quality yes
 *barobjrng 1e+075
 tilim 1000000
+iis 1
 $offecho
 
 $onecho > gurobi.opt
