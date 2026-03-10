@@ -118,7 +118,7 @@ CapacityFactor(r,'HD_Solar_Thermal',l,y) = CapacityFactor(r,'P_PV_Utility_Avg',l
 *
 * ####### No new capacity construction in 2015 #############
 *
-NewCapacity.fx('%year%',t,r)$(TagTechnologyToSubsets(t,'Transformation')) = 0;
+*NewCapacity.fx('%year%',t,r)$(TagTechnologyToSubsets(t,'Transformation')) = 0;
 NewCapacity.fx('%year%',t,r)$(TagTechnologyToSubsets(t,'PowerSupply')) = 0;
 *NewCapacity.fx('%year%',t,r)$(TagTechnologyToSubsets(t,'SectorCoupling')) = 0;
 NewCapacity.fx('%year%',t,r)$(TagTechnologyToSubsets(t,'StorageDummies')) = 0;

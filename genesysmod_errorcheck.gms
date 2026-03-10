@@ -45,11 +45,13 @@ error_OperationalLifeMissing(t)$(not OperationalLife(t) and not TagTechnologyToS
 $else
 error_OperationalLifeMissing(t)$(not OperationalLife(t)) = 1;
 $endif
+display error_OperationalLifeMissing;
 if(sum((t),error_OperationalLifeMissing(t)),abort "OperationalLife is missing from a Technology. Please check your OperationalLife data to account for all technologies. Missing values are listed in the parameter error_OperationalLifeMissing.");
 
 * Check for errors in CapacityFactor data -> if yes, then exit
 parameter error_CapacityFactorDataMissing(r_full,t,y_full);
 error_CapacityFactorDataMissing(r,t,y)$(not sum(l,CapacityFactor(r,t,l,y)) and AvailabilityFactor(r,t,y) and TotalAnnualMaxCapacity(r,t,y)) = 1;
+display error_CapacityFactorDataMissing;
 if(sum((r,t,y),error_CapacityFactorDataMissing(r,t,y)),abort "CapacityFactor is missing from a Technology. Please check your Hourly data file to account for all technologies. Technologies where values are missing are listed in the parameter error_CapacityFactorDataMissing.");
 
 * Check for missing entries in CapacityToActivityUnit -> if yes, then exit
@@ -66,6 +68,7 @@ if(sum((r,f,y,rr),error_TradeCapacityMismatch('TradeCapacity',r,f,y,rr)+error_Tr
 * Check for missing entries in AvailabilityFactor -> if yes, then exit
 parameter error_AvailabilityFactorMissing(r_full,t,y_full);
 error_AvailabilityFactorMissing(r,t,y)$(ResidualCapacity(r,t,y) and not AvailabilityFactor(r,t,y)) = 1;
+display error_AvailabilityFactorMissing;
 if(sum((r,t,y),error_AvailabilityFactorMissing(r,t,y)),display "WARNING: AvailabilityFactor is missing from a Technology. Please check your AvailabilityFactor data in Excel to account for all technologies. Technologies where values are missing are listed in the parameter error_AvailabilityFactorMissing.");
 
 
