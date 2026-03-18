@@ -55,6 +55,7 @@ free variable DiscountedAnnualTotalExogenousTradeCosts(YEAR_FULL,REGION_FULL) Di
 * ############### New other things... ###############
 
 ExogenousTradeLossBetweenRegions(y,f,r,exr) = TradeLossFactor(f,y)*ExogenousTradeRoute(f,r,exr);
+ExogenousTradeCosts(y,f,r,exr) = TradeCostFactor(f,y)*ExogenousTradeRoute(f,r,exr);
 
 * ############### ############### ###############
 * ############### New constraints ###############
