@@ -159,23 +159,28 @@ se=0
 
 $offecho
 
+$setglobal param_suffix ""
+
+* Change suffix if vertical integration is on
+$if %switch_vertical_integration% == 1 $setglobal param_suffix _vi
+
 $ifthen %switch_unixPath% == 1
 $setglobal run_connect 1
-$call "gams genesysmod_gams_connect.gms --task=check_date --in_file=%inputdir%%data_file%.xlsx --out_file=%gdxdir%%data_file%_par.gdx";
+$call "gams genesysmod_gams_connect.gms --task=check_date --in_file=%inputdir%%data_file%.xlsx --out_file=%gdxdir%%data_file%_par%param_suffix%.gdx";
 $if exist gams_connect.inc $include gams_connect.inc
-$ifi %run_connect% == 0 $log "Skipping GAMS Connect: %gdxdir%%data_file%_par.gdx is up to date."
-$ifi %switch_only_load_gdx%==0 $ifi %run_connect% == 1 $call "gams genesysmod_gams_connect.gms --task=load_params --in_file=%inputdir%%data_file%.xlsx --out_file=%gdxdir%%data_file%_par.gdx";  
+$ifi %run_connect% == 0 $log "Skipping GAMS Connect: %gdxdir%%data_file%_par%param_suffix%.gdx is up to date."
+$ifi %switch_only_load_gdx%==0 $ifi %run_connect% == 1 $call "gams genesysmod_gams_connect.gms --task=load_params --in_file=%inputdir%%data_file%.xlsx --out_file=%gdxdir%%data_file%_par%param_suffix%.gdx --switch_vertical_integration=%switch_vertical_integration%";  
 $elseif %switch_dataload_engine% == gamsconnect
 $setglobal run_connect 1
-$call "gams genesysmod_gams_connect.gms --task=check_date --in_file=%inputdir%%data_file%.xlsx --out_file=%gdxdir%%data_file%_par.gdx";
+$call "gams genesysmod_gams_connect.gms --task=check_date --in_file=%inputdir%%data_file%.xlsx --out_file=%gdxdir%%data_file%_par%param_suffix%.gdx";
 $if exist gams_connect.inc $include gams_connect.inc
-$ifi %run_connect% == 0 $log "Skipping GAMS Connect: %gdxdir%%data_file%_par.gdx is up to date."
-$ifi %switch_only_load_gdx%==0 $ifi %run_connect% == 1 $call "gams genesysmod_gams_connect.gms --task=load_params --in_file=%inputdir%%data_file%.xlsx --out_file=%gdxdir%%data_file%_par.gdx";
+$ifi %run_connect% == 0 $log "Skipping GAMS Connect: %gdxdir%%data_file%_par%param_suffix%.gdx is up to date."
+$ifi %switch_only_load_gdx%==0 $ifi %run_connect% == 1 $call "gams genesysmod_gams_connect.gms --task=load_params --in_file=%inputdir%%data_file%.xlsx --out_file=%gdxdir%%data_file%_par%param_suffix%.gdx --switch_vertical_integration=%switch_vertical_integration%";
 $else
 $ifi %switch_only_load_gdx%==0 $call "gdxxrw %inputdir%%data_file%.xlsx @%tempdir%temp_%data_file%_par.tmp o=%gdxdir%%data_file%_par.gdx MaxDupeErrors=99 CheckDate ";
 $endif
 
-$GDXin %gdxdir%%data_file%_par.gdx
+$GDXin %gdxdir%%data_file%_par%param_suffix%.gdx
 $onUNDF
 $loadm
 $loadm SpecifiedAnnualDemand ReserveMarginTagFuel
@@ -193,8 +198,13 @@ $loadm TagTechnologyToSector AnnualSectoralEmissionLimit TagCanFuelBeTraded Annu
 $loadm RegionalCCSLimit TagDemandFuelToSector TagElectricTechnology  TagModalTypeToModalGroups
 $loadm TagTechnologyToSubsets TagFuelToSubsets StorageE2PRatio  ModelPeriodEmissionLimit  RegionalModelPeriodEmissionLimit
 $loadm DistrictHeatDemand DistrictHeatSplit
+$loadm TagExogenousRegion
+$if %switch_vertical_integration% == 1 $loadm ExogenousDemand ExogenousProduction
 $offUNDF
 
+*EXOGENOUS_REGION_FULL(r_full)$(TagExogenousRegion(r_full) = 1) = yes;
+* Display to verify it worked (Check your .lst file)
+*Display EXOGENOUS_REGION_FULL;
 
 *
 * ####### Step 3: Set regional values, if only value given for base-region #############

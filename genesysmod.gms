@@ -16,6 +16,7 @@
 *
 * #############################################################
 
+* GENeSYS_MOD.gms VI tag version
 
 *********************************************
 ****** begin of switches / settings *********
@@ -24,10 +25,10 @@
 
 $if not set data_file                    $setglobal data_file RegularParameters_None
 $if not set hourly_data_file             $setglobal hourly_data_file Timeseries_Europe_EnVis_REPowerEU++
-$if not set model_region                 $setglobal model_region europe
-$if not set data_base_region             $setglobal data_base_region DE
+$if not set model_region                 $setglobal model_region sweden
+$if not set data_base_region             $setglobal data_base_region SE3
 $if not set year                         $setglobal year 2018
-$if not set emissionPathway              $setglobal emissionPathway NECPEssentials
+$if not set emissionPathway              $setglobal emissionPathway NECPEssentials_Sweden
 $if not set emissionScenario             $setglobal emissionScenario globalLimit
 
 * ### settings for time series reduction
@@ -42,7 +43,7 @@ $if not set elmod_dunkelflaute           $setglobal elmod_dunkelflaute 0
 $if not set switch_test_data_load        $setglobal switch_test_data_load 0
 $if not set switch_only_load_gdx         $setglobal switch_only_load_gdx 0
 
-$if not set switch_unixPath              $setglobal switch_unixPath 0
+$if not set switch_unixPath              $setglobal switch_unixPath 1
 $if not set switch_read_data_long        $setglobal switch_read_data_long 1
 $if not set switch_write_output          $setglobal switch_write_output gdx
 $if not set switch_only_write_results    $setglobal switch_only_write_results 0
@@ -57,7 +58,7 @@ $if not set threads                      $setglobal threads 4
 $if not set switch_investLimit           $setglobal switch_investLimit 1
 $if not set switch_infeasibility_tech    $setglobal switch_infeasibility_tech 0
 $if not set switch_base_year_bounds      $setglobal switch_base_year_bounds 1
-$if not set switch_base_year_bounds_debugging      $setglobal switch_base_year_bounds_debugging 0
+$if not set switch_base_year_bounds_debugging      $setglobal switch_base_year_bounds_debugging 1
 
 * ### model settings, enabling / changing certain features
 
@@ -73,6 +74,8 @@ $if not set switch_hydrogen_blending_share      $setglobal switch_hydrogen_blend
 $if not set set_storagelevelstart_up     $setglobal set_storagelevelstart_up 0.75
 $if not set set_storagelevelstart_low    $setglobal set_storagelevelstart_low 0.25
 $if not set switch_e2pratio_deviationfactor    $setglobal switch_e2pratio_deviationfactor 2
+
+$if not set switch_vertical_integration  $setglobal switch_vertical_integration 1
 
 * ### settings for peaking constraints
 
@@ -120,8 +123,14 @@ $elseif %emissionPathway% == Green
 $setglobal data_file RegularParameters_Europe_EnVis_Green
 $setglobal hourly_data_file Timeseries_Europe_EnVis_Green
 $elseif %emissionPathway% == Trinity
-$setglobal data_file RegularParameters_Europe_EnVis_Trinity
-$setglobal hourly_data_file Timeseries_Europe_EnVis_Trinity
+$setglobal data_file RegularParameters_Europe_EnVis_Trinity_v2000
+$setglobal hourly_data_file Timeseries_Europe_EnVis_Green
+$elseif %emissionPathway% == Trinity_Sweden
+$setglobal data_file RegularParameters_Sweden_EnVis_Trinity_updatedMSHS_2
+$setglobal hourly_data_file Timeseries_Sweden
+$elseif %emissionPathway% == NECPEssentials_Sweden
+$setglobal data_file RegularParameters_Sweden_EnVis_NECPEssentials_vi_input_tag
+$setglobal hourly_data_file Timeseries_Sweden
 $endif
 
 $ifthen %model_region% == middleearth
@@ -141,14 +150,14 @@ starttime = jnow;
 * ####### Declarations #############
 *
 
-$offlisting
+*$offlisting
 $include genesysmod_dec.gms
 
 *
 * ####### Load data from provided excel files #############
 *
 
-$offlisting
+*$offlisting
 $ifthen %switch_read_data_long% == 1
 $include genesysmod_dataload_long.gms
 $else
@@ -193,7 +202,7 @@ $ifthen %switch_only_write_results% == 0
 
 
 
-$offlisting
+*$offlisting
 $include genesysmod_equ.gms
 
 
@@ -263,7 +272,6 @@ display "emissionScenario = %emissionScenario%";
 display "emissionPathway = %emissionPathway%";
 
 display "info = %info%";
-
 *
 * ####### Model and Solve statements #############
 *

@@ -32,8 +32,11 @@ alias (y,yy,YEAR);
 set REGION_FULL All regions included in the input data;
 alias (REGION_FULL,r_full,rr_full);
 
+*Set EXOGENOUS_REGION_FULL(REGION_FULL) All exogenous regions;
+
 set REGION(REGION_FULL) Subset of regions for which computation should actually happen;
-alias (REGION,r,rr)
+alias (REGION,r,rr);
+
 
 set TECHNOLOGY List of all available technologies
                /Infeasibility_Power,
@@ -42,7 +45,6 @@ set TECHNOLOGY List of all available technologies
                 Infeasibility_HMI,
                 Infeasibility_HHI,
                 Infeasibility_HRI,
-                Infeasibility_HD,
                 Infeasibility_Mob_Passenger,
                 Infeasibility_Mob_Freight,
                 Infeasibility_Natural_Gas /;
@@ -77,6 +79,11 @@ parameter GeneralDiscountRate(REGION_FULL) Defines the discountrate to be used f
 parameter SocialDiscountRate(REGION_FULL) Defines the discountrate to be used for negative externalities for emissions. Unit: Percent;
 parameter TechnologyDiscountRate(REGION_FULL,TECHNOLOGY) Defines the discountrate to be used for technology investments. Unit: Percent;
 parameter DepreciationMethod Defines the method to use for depreciation of assets. Options: 1 or 2;
+
+* ####### Exogenous region #######
+parameter TagExogenousRegion(REGION_FULL);
+parameter ExogenousDemand(YEAR_FULL,TIMESLICE_FULL,FUEL,REGION_FULL) The total value of export of model regions to exogenous region; 
+parameter ExogenousProduction(YEAR_FULL,TIMESLICE_FULL,FUEL,REGION_FULL) The total value of import of model regions from exogenous region;
 
 *
 * ####### Demands #############
@@ -224,6 +231,7 @@ parameter ProductionGrowthLimit(FUEL,YEAR_FULL);
 * # Model Variables #
 * #####################
 *
+
 * ############### Capacity Variables ############*
 *
 positive variable NewCapacity(y_full,TECHNOLOGY,REGION_FULL);
@@ -260,7 +268,7 @@ positive variable AnnualVariableOperatingCost(y_full,TECHNOLOGY,REGION_FULL);
 positive variable AnnualFixedOperatingCost(y_full,TECHNOLOGY,REGION_FULL);
 positive variable VariableOperatingCost(y_full,TIMESLICE_FULL,TECHNOLOGY,REGION_FULL);
 positive variable TotalDiscountedCost(y_full,REGION_FULL);
-positive variable TotalDiscountedCostByTechnology(y_full,TECHNOLOGY,REGION_FULL)
+positive variable TotalDiscountedCostByTechnology(y_full,TECHNOLOGY,REGION_FULL);
 
 positive variable AnnualCurtailmentCost(YEAR_FULL,FUEL,REGION_FULL);
 positive variable DiscountedAnnualCurtailmentCost(YEAR_FULL,FUEL,REGION_FULL);

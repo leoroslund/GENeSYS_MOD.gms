@@ -130,7 +130,7 @@ output_trade(r,rr,f,'Export',y) = sum(l,Export.l(y,l,f,r,rr));
 output_trade(r,rr,f,'Import',y) = sum(l,Import.l(y,l,f,r,rr));
 
 parameters SelfSufficiencyRate,ElectrificationRate,output_other;
-SelfSufficiencyRate(r,y) = ProductionAnnual(y,'Power',r)/(SpecifiedAnnualDemand(r,'Power',y)+UseAnnual(y,'Power',r));
+SelfSufficiencyRate(r,y)$(TagExogenousRegion(r) = 0 and (SpecifiedAnnualDemand(r,'Power',y)+UseAnnual(y,'Power',r)) > 0) = ProductionAnnual(y,'Power',r)/(SpecifiedAnnualDemand(r,'Power',y)+UseAnnual(y,'Power',r));
 ElectrificationRate(Sector,y)$(sum((f,r)$(TagDemandFuelToSector(f,Sector)>0),TagDemandFuelToSector(f,Sector)*ProductionAnnual(y,f,r)) > 0) = sum((f,t,r)$(ProductionByTechnologyAnnual.l(y,t,f,r) > 0), TagDemandFuelToSector(f,Sector)*TagElectricTechnology(t)*ProductionByTechnologyAnnual.l(y,t,f,r))/sum((f,r)$(TagDemandFuelToSector(f,Sector)>0),TagDemandFuelToSector(f,Sector)*ProductionAnnual(y,f,r));
 
 Set FinalEnergy(f);
@@ -169,8 +169,8 @@ output_other('SelfSufficiencyRate',r,'X','X',y) = SelfSufficiencyRate(r,y) ;
 output_other('ElectrificationRate','X',Sector,'X',y)  = ElectrificationRate(Sector,y) ;
 output_other('FinalEnergyConsumption',r,t,f,y) =  UseByTechnologyAnnual.l(y,t,f,r)/3.6;
 output_other('FinalEnergyConsumption',r,'InputDemand',f,y) = (SpecifiedAnnualDemand(r,f,y))/3.6;
-output_other('ElectricityShareOfFinalEnergy',r,'X','X',y) = (UseAnnual(y,'Power',r)+SpecifiedAnnualDemand(r,'Power',y)) /  (sum(FinalEnergy,UseAnnual(y,FinalEnergy,r))+SpecifiedAnnualDemand(r,'Power',y));
-output_other('ElectricityShareOfFinalEnergy','Total','X','X',y) = sum(r,(UseAnnual(y,'Power',r)+SpecifiedAnnualDemand(r,'Power',y))) /  sum(r,(sum(FinalEnergy,UseAnnual(y,FinalEnergy,r))+SpecifiedAnnualDemand(r,'Power',y)));
+output_other('ElectricityShareOfFinalEnergy',r,'X','X',y)$(TagExogenousRegion(r) = 0 and (sum(FinalEnergy,UseAnnual(y,FinalEnergy,r))+SpecifiedAnnualDemand(r,'Power',y)) > 0) = (UseAnnual(y,'Power',r)+SpecifiedAnnualDemand(r,'Power',y)) /  (sum(FinalEnergy,UseAnnual(y,FinalEnergy,r))+SpecifiedAnnualDemand(r,'Power',y));
+output_other('ElectricityShareOfFinalEnergy','Total','X','X',y)$(sum(r,(sum(FinalEnergy,UseAnnual(y,FinalEnergy,r))+SpecifiedAnnualDemand(r,'Power',y))) > 0) = sum(r,(UseAnnual(y,'Power',r)+SpecifiedAnnualDemand(r,'Power',y))) /  sum(r,(sum(FinalEnergy,UseAnnual(y,FinalEnergy,r))+SpecifiedAnnualDemand(r,'Power',y)));
 
 parameter output_energydemandstatistics;
 *** Final Energy for all regions per sector
@@ -187,17 +187,19 @@ output_energydemandstatistics('Final Energy Demand [TWh]','Total','Total',f,y) =
 output_energydemandstatistics('Final Energy Demand [TWh]','Total','EU27',f,y) = sum((EU27),sum(se,output_energydemandstatistics('Final Energy Demand [TWh]',se,EU27,f,y))+output_energydemandstatistics('Final Energy Demand [TWh]','Exogenous',EU27,f,y));
 *output_energydemandstatistics('Final Energy Demand [TWh]','Total','EU27',f,y) = sum((EU27),sum(se,output_energydemandstatistics('Final Energy Demand [TWh]',se,EU27,f,y))+output_energydemandstatistics('Final Energy Demand [TWh]','Exogenous',EU27,'Power',y));
 *** Share of Fuel in Final Energy
-output_energydemandstatistics('Final Energy Demand [% of Total]','Total','EU27',f,y) = output_energydemandstatistics('Final Energy Demand [TWh]','Total','EU27',f,y)/sum(ff,output_energydemandstatistics('Final Energy Demand [TWh]','Total','EU27',ff,y));
-output_energydemandstatistics('Final Energy Demand [% of Total]','Total','Total',f,y) = output_energydemandstatistics('Final Energy Demand [TWh]','Total','Total',f,y)/sum(ff,output_energydemandstatistics('Final Energy Demand [TWh]','Total','Total',ff,y));
+*** Share of Fuel in Final Energy
+output_energydemandstatistics('Final Energy Demand [% of Total]','Total','EU27',f,y)$(sum(ff,output_energydemandstatistics('Final Energy Demand [TWh]','Total','EU27',ff,y)) > 0) = output_energydemandstatistics('Final Energy Demand [TWh]','Total','EU27',f,y)/sum(ff,output_energydemandstatistics('Final Energy Demand [TWh]','Total','EU27',ff,y));
+output_energydemandstatistics('Final Energy Demand [% of Total]','Total','Total',f,y)$(sum(ff,output_energydemandstatistics('Final Energy Demand [TWh]','Total','Total',ff,y)) > 0) = output_energydemandstatistics('Final Energy Demand [TWh]','Total','Total',f,y)/sum(ff,output_energydemandstatistics('Final Energy Demand [TWh]','Total','Total',ff,y));
 
 *** Primary Energy Demand
 output_energydemandstatistics('Primary Energy [TWh]','Total',r,f,y)$(not (diag(f,'Area_Rooftop_Residential')+diag(f,'Area_Rooftop_Commercial'))) = sum(t,ProductionByTechnologyAnnual.l(y,t,f,r)$(not sum((m,ff),InputActivityRatio(r,t,ff,m,y))))/3.6;
 output_energydemandstatistics('Primary Energy [TWh]','Total','Total',f,y)$(not (diag(f,'Area_Rooftop_Residential')+diag(f,'Area_Rooftop_Commercial'))) = sum((t,r),ProductionByTechnologyAnnual.l(y,t,f,r)$(not sum((m,ff),InputActivityRatio(r,t,ff,m,y))))/3.6;
 output_energydemandstatistics('Primary Energy [TWh]','Total','EU27',f,y)$(not (diag(f,'Area_Rooftop_Residential')+diag(f,'Area_Rooftop_Commercial'))) = sum((t,EU27),ProductionByTechnologyAnnual.l(y,t,f,EU27)$(not sum((m,ff),InputActivityRatio(EU27,t,ff,m,y))))/3.6;
 *** Primary Energy Demand Shares
-output_energydemandstatistics('Primary Energy [% of Total]','Total',r,f,y) = output_energydemandstatistics('Primary Energy [TWh]','Total',r,f,y)/sum(ff,output_energydemandstatistics('Primary Energy [TWh]','Total',r,ff,y));
-output_energydemandstatistics('Primary Energy [% of Total]','Total','Total',f,y) = sum(r,output_energydemandstatistics('Primary Energy [TWh]','Total',r,f,y))/sum((r,ff),output_energydemandstatistics('Primary Energy [TWh]','Total',r,ff,y));
-output_energydemandstatistics('Primary Energy [% of Total]','Total','EU27',f,y) = sum(EU27,output_energydemandstatistics('Primary Energy [TWh]','Total',EU27,f,y))/sum((EU27,ff),output_energydemandstatistics('Primary Energy [TWh]','Total',EU27,ff,y));
+*** Primary Energy Demand Shares
+output_energydemandstatistics('Primary Energy [% of Total]','Total',r,f,y)$(TagExogenousRegion(r) = 0 and sum(ff,output_energydemandstatistics('Primary Energy [TWh]','Total',r,ff,y)) > 0) = output_energydemandstatistics('Primary Energy [TWh]','Total',r,f,y)/sum(ff,output_energydemandstatistics('Primary Energy [TWh]','Total',r,ff,y));
+output_energydemandstatistics('Primary Energy [% of Total]','Total','Total',f,y)$(sum((r,ff),output_energydemandstatistics('Primary Energy [TWh]','Total',r,ff,y)) > 0) = sum(r,output_energydemandstatistics('Primary Energy [TWh]','Total',r,f,y))/sum((r,ff),output_energydemandstatistics('Primary Energy [TWh]','Total',r,ff,y));
+output_energydemandstatistics('Primary Energy [% of Total]','Total','EU27',f,y)$(sum((EU27,ff),output_energydemandstatistics('Primary Energy [TWh]','Total',EU27,ff,y)) > 0) = sum(EU27,output_energydemandstatistics('Primary Energy [TWh]','Total',EU27,f,y))/sum((EU27,ff),output_energydemandstatistics('Primary Energy [TWh]','Total',EU27,ff,y));
 
 *** Share of Fuel in Electricity Mix
 output_energydemandstatistics('Electricity Generation [TWh]','Power',r,f,y) = sum((t,m)$(not TagTechnologyToSector(t,'Storages')),(sum(l,RateOfProductionByTechnologyByMode(y,l,t,m,'Power',r)$(InputActivityRatio(r,t,f,m,y)) * YearSplit(l,y))))/3.6;
@@ -205,15 +207,16 @@ output_energydemandstatistics('Electricity Generation [TWh]','Power',r,'Solar',y
 output_energydemandstatistics('Electricity Generation [TWh]','Power',r,'Wind',y) = sum(t$(TagTechnologyToSubsets(t,'Wind')),ProductionByTechnologyAnnual.l(y,t,'Power',r))/3.6;
 output_energydemandstatistics('Electricity Generation [TWh]','Power',r,'Hydro',y) = sum(t$(TagTechnologyToSubsets(t,'Hydro')),ProductionByTechnologyAnnual.l(y,t,'Power',r))/3.6;
 
-output_energydemandstatistics('Electricity Mix [%]','Power',r,'Solar',y) = output_energydemandstatistics('Electricity Generation [TWh]','Power',r,'Solar',y)/(sum(t,ProductionByTechnologyAnnual.l(y,t,'Power',r)$(not TagTechnologyToSector(t,'Storages')))/3.6);
-output_energydemandstatistics('Electricity Mix [%]','Power',r,'Wind',y) = output_energydemandstatistics('Electricity Generation [TWh]','Power',r,'Wind',y)/(sum(t,ProductionByTechnologyAnnual.l(y,t,'Power',r)$(not TagTechnologyToSector(t,'Storages')))/3.6);
-output_energydemandstatistics('Electricity Mix [%]','Power',r,'Hydro',y) = output_energydemandstatistics('Electricity Generation [TWh]','Power',r,'Hydro',y)/(sum(t,ProductionByTechnologyAnnual.l(y,t,'Power',r)$(not TagTechnologyToSector(t,'Storages')))/3.6);
-output_energydemandstatistics('Electricity Mix [%]','Power',r,f,y) = output_energydemandstatistics('Electricity Generation [TWh]','Power',r,f,y)/(sum(t,ProductionByTechnologyAnnual.l(y,t,'Power',r)$(not TagTechnologyToSector(t,'Storages')))/3.6);
-output_energydemandstatistics('Electricity Mix [%]','Power',r,'Other',y) = 1-sum(f,output_energydemandstatistics('Electricity Mix [%]','Power',r,f,y))-output_energydemandstatistics('Electricity Mix [%]','Power',r,'Hydro',y)-output_energydemandstatistics('Electricity Mix [%]','Power',r,'Wind',y)-output_energydemandstatistics('Electricity Mix [%]','Power',r,'Solar',y);
+output_energydemandstatistics('Electricity Mix [%]','Power',r,'Solar',y)$(TagExogenousRegion(r) = 0 and sum(t,ProductionByTechnologyAnnual.l(y,t,'Power',r)$(not TagTechnologyToSector(t,'Storages'))) > 0) = output_energydemandstatistics('Electricity Generation [TWh]','Power',r,'Solar',y)/(sum(t,ProductionByTechnologyAnnual.l(y,t,'Power',r)$(not TagTechnologyToSector(t,'Storages')))/3.6);
+output_energydemandstatistics('Electricity Mix [%]','Power',r,'Wind',y)$(TagExogenousRegion(r) = 0 and sum(t,ProductionByTechnologyAnnual.l(y,t,'Power',r)$(not TagTechnologyToSector(t,'Storages'))) > 0) = output_energydemandstatistics('Electricity Generation [TWh]','Power',r,'Wind',y)/(sum(t,ProductionByTechnologyAnnual.l(y,t,'Power',r)$(not TagTechnologyToSector(t,'Storages')))/3.6);
+output_energydemandstatistics('Electricity Mix [%]','Power',r,'Hydro',y)$(TagExogenousRegion(r) = 0 and sum(t,ProductionByTechnologyAnnual.l(y,t,'Power',r)$(not TagTechnologyToSector(t,'Storages'))) > 0) = output_energydemandstatistics('Electricity Generation [TWh]','Power',r,'Hydro',y)/(sum(t,ProductionByTechnologyAnnual.l(y,t,'Power',r)$(not TagTechnologyToSector(t,'Storages')))/3.6);
+output_energydemandstatistics('Electricity Mix [%]','Power',r,f,y)$(TagExogenousRegion(r) = 0 and sum(t,ProductionByTechnologyAnnual.l(y,t,'Power',r)$(not TagTechnologyToSector(t,'Storages'))) > 0) = output_energydemandstatistics('Electricity Generation [TWh]','Power',r,f,y)/(sum(t,ProductionByTechnologyAnnual.l(y,t,'Power',r)$(not TagTechnologyToSector(t,'Storages')))/3.6);
+output_energydemandstatistics('Electricity Mix [%]','Power',r,'Other',y)$(TagExogenousRegion(r) = 0) = 1-sum(f,output_energydemandstatistics('Electricity Mix [%]','Power',r,f,y))-output_energydemandstatistics('Electricity Mix [%]','Power',r,'Hydro',y)-output_energydemandstatistics('Electricity Mix [%]','Power',r,'Wind',y)-output_energydemandstatistics('Electricity Mix [%]','Power',r,'Solar',y);
 *** Imports as Share of Primary Energy
-output_energydemandstatistics('Import Share of Primary Energy [%]','Total',r,f,y)$(sum((t,m)$(TagTechnologyToSubsets(t,'ImportTechnology')),OutputActivityRatio(r,t,f,m,y))) = (sum(t,ProductionByTechnologyAnnual.l(y,t,f,r))/3.6)/sum(ff,output_energydemandstatistics('Primary Energy [TWh]','Total',r,ff,y));
-output_energydemandstatistics('Import Share of Primary Energy [%]','Total','Total',f,y)$(sum((t,m,r)$(TagTechnologyToSubsets(t,'ImportTechnology')),OutputActivityRatio(r,t,f,m,y))) = (sum((t,r),ProductionByTechnologyAnnual.l(y,t,f,r))/3.6)/sum(ff,output_energydemandstatistics('Primary Energy [TWh]','Total','Total',ff,y));
-output_energydemandstatistics('Import Share of Primary Energy [%]','Total','EU27',f,y)$(sum((t,m,EU27)$(TagTechnologyToSubsets(t,'ImportTechnology')),OutputActivityRatio(EU27,t,f,m,y))) = (sum((t,EU27),ProductionByTechnologyAnnual.l(y,t,f,EU27))/3.6)/sum(ff,output_energydemandstatistics('Primary Energy [TWh]','Total','EU27',ff,y));
+*** Imports as Share of Primary Energy
+output_energydemandstatistics('Import Share of Primary Energy [%]','Total',r,f,y)$(TagExogenousRegion(r) = 0 and sum((t,m)$(TagTechnologyToSubsets(t,'ImportTechnology')),OutputActivityRatio(r,t,f,m,y)) and sum(ff,output_energydemandstatistics('Primary Energy [TWh]','Total',r,ff,y)) > 0) = (sum(t,ProductionByTechnologyAnnual.l(y,t,f,r))/3.6)/sum(ff,output_energydemandstatistics('Primary Energy [TWh]','Total',r,ff,y));
+output_energydemandstatistics('Import Share of Primary Energy [%]','Total','Total',f,y)$(sum((t,m,r)$(TagTechnologyToSubsets(t,'ImportTechnology')),OutputActivityRatio(r,t,f,m,y)) and sum(ff,output_energydemandstatistics('Primary Energy [TWh]','Total','Total',ff,y)) > 0) = (sum((t,r),ProductionByTechnologyAnnual.l(y,t,f,r))/3.6)/sum(ff,output_energydemandstatistics('Primary Energy [TWh]','Total','Total',ff,y));
+output_energydemandstatistics('Import Share of Primary Energy [%]','Total','EU27',f,y)$(sum((t,m,EU27)$(TagTechnologyToSubsets(t,'ImportTechnology')),OutputActivityRatio(EU27,t,f,m,y)) and sum(ff,output_energydemandstatistics('Primary Energy [TWh]','Total','EU27',ff,y)) > 0) = (sum((t,EU27),ProductionByTechnologyAnnual.l(y,t,f,EU27))/3.6)/sum(ff,output_energydemandstatistics('Primary Energy [TWh]','Total','EU27',ff,y));
 
 
 $ifthen set Info
